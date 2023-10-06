@@ -10,89 +10,76 @@
 #include<bits+/stdcpp>
 using namespace std
 
+#include <iostream>
+#include <vector>
+
+class Component {
+public:
+    virtual bool hasObstacle(int x, int y) = 0;
+    virtual ~Component() {}
+};
+
+class Leaf : public Component {
+private:
+    int x;
+    int y;
+
+public:
+    Leaf(int x, int y) : x(x), y(y) {}
+
+    bool hasObstacle(int x, int y) override {
+        return (this->x == x && this->y == y);
+    }
+};
+
+class Composite : public Component {
+private:
+    std::vector<Component*> children;
+
+public:
+    void add(Component* component) {
+        children.push_back(component);
+    }
+
+    bool hasObstacle(int x, int y) override {
+        for (Component* child : children) {
+            if (child->hasObstacle(x, y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    ~Composite() {
+        for (Component* child : children) {
+            delete child;
+        }
+    }
+};
+
 class Grid {
 private:
     int size_x;
     int size_y;
-    set<pair<int, int>> obstacles;
+    Composite* obstacles;
 
 public:
-    Grid(int x, int y) : size_x(x), size_y(y) {}
+    Grid(int x, int y) : size_x(x), size_y(y), obstacles(new Composite()) {}
 
     void addObstacle(int x, int y) {
-        obstacles.insert({x, y});
+        obstacles->add(new Leaf(x, y));
     }
 
     bool hasObstacle(int x, int y) {
-        return obstacles.find({x, y}) != obstacles.end();
+        return obstacles->hasObstacle(x, y);
+    }
+
+    ~Grid() {
+        delete obstacles;
     }
 };
 
-class Rover {
-private:
-    int x;
-    int y;
-    char direction;
-    Grid* grid;
-    bool obstacleDetected;
-
-public:
-    Rover(int startX, int startY, char startDirection, Grid* gridPtr) 
-        : x(startX), y(startY), direction(startDirection), grid(gridPtr), obstacleDetected(false) {}
-
-    void move() {
-        int newX = x, newY = y;
-
-        if (direction == 'N') {
-            newY++;
-        } else if (direction == 'S') {
-            newY--;
-        } else if (direction == 'E') {
-            newX++;
-        } else if (direction == 'W') {
-            newX--;
-        }
-
-        if (newX >= 0 && newX < grid->getSizeX() && newY >= 0 && newY < grid->getSizeY() && !grid->hasObstacle(newX, newY)) {
-            x = newX;
-            y = newY;
-        } else {
-            obstacleDetected = true;
-        }
-    }
-
-    void turnLeft() {
-        if (direction == 'N') {
-            direction = 'W';
-        } else if (direction == 'S') {
-            direction = 'E';
-        } else if (direction == 'E') {
-            direction = 'N';
-        } else if (direction == 'W') {
-            direction = 'S';
-        }
-    }
-
-    void turnRight() {
-        if (direction == 'N') {
-            direction = 'E';
-        } else if (direction == 'S') {
-            direction = 'W';
-        } else if (direction == 'E') {
-            direction = 'S';
-        } else if (direction == 'W') {
-            direction = 'N';
-        }
-    }
-
-    std::string generateStatusReport() {
-        if (obstacleDetected) {
-            return "Rover is at (" + to_string(x) + ", " + to_string(y) + ") facing " + direction + ". Obstacle detected. Rover stopped.";
-        } else {
-            return "Rover is at (" + to_string(x) + ", " + to_string(y) + ") facing " + direction + ". No obstacles detected.";
-        }
-    }
-};
+// Rest of your code remains unchanged
 
 int main() {
     Grid grid(10, 10);
@@ -100,19 +87,25 @@ int main() {
     grid.addObstacle(3, 5);
 
     Rover rover(0, 0, 'N', &grid);
-    vector<char> commands = {'M', 'M', 'R', 'M', 'L', 'M'};
+    std::vector<Command*> commands = {
+        new MoveCommand(&rover),
+        new MoveCommand(&rover),
+        new TurnRightCommand(&rover),
+        new MoveCommand(&rover),
+        new TurnLeftCommand(&rover),
+        new MoveCommand(&rover)
+    };
 
-    for (char command : commands) {
-        if (command == 'M') {
-            rover.move();
-        } else if (command == 'L') {
-            rover.turnLeft();
-        } else if (command == 'R') {
-            rover.turnRight();
-        }
+    for (Command* command : commands) {
+        rover.executeCommand(command);
     }
 
-    cout<<rover.generateStatusReport()<<endl;
+    std::cout << rover.generateStatusReport() << std::endl;
+
+    // Clean up the allocated command objects
+    for (Command* command : commands) {
+        delete command;
+    }
 
     return 0;
 }
