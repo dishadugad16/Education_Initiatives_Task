@@ -47,7 +47,7 @@ The solution provides a Flask-based web application implementing the specified r
 1. **Clone the Repository**:
 
    ```bash
-   git clone <repository-url>
+   git clone (https://github.com/dishadugad16/Education_Initiatives_Task.git)
    cd todo-list-manager
    ```
 
