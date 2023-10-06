@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include<bits+/stdcpp>
+#include<bits/stdc++.h>
 using namespace std
 
 class Component {
