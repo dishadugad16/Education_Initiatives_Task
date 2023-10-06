@@ -10,9 +10,6 @@
 #include<bits+/stdcpp>
 using namespace std
 
-#include <iostream>
-#include <vector>
-
 class Component {
 public:
     virtual bool hasObstacle(int x, int y) = 0;
@@ -34,7 +31,7 @@ public:
 
 class Composite : public Component {
 private:
-    std::vector<Component*> children;
+    vector<Component*> children;
 
 public:
     void add(Component* component) {
@@ -79,8 +76,6 @@ public:
     }
 };
 
-// Rest of your code remains unchanged
-
 int main() {
     Grid grid(10, 10);
     grid.addObstacle(2, 2);
@@ -100,7 +95,7 @@ int main() {
         rover.executeCommand(command);
     }
 
-    std::cout << rover.generateStatusReport() << std::endl;
+    cout<<rover.generateStatusReport()<<endl;
 
     // Clean up the allocated command objects
     for (Command* command : commands) {
