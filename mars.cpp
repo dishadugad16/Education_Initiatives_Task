@@ -82,7 +82,7 @@ int main() {
     grid.addObstacle(3, 5);
 
     Rover rover(0, 0, 'N', &grid);
-    std::vector<Command*> commands = {
+    vector<Command*> commands = {
         new MoveCommand(&rover),
         new MoveCommand(&rover),
         new TurnRightCommand(&rover),
